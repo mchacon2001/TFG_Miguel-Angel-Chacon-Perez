@@ -1,0 +1,87 @@
+<?php
+
+namespace App\Request\Public;
+
+use App\Services\User\UserPermissionService;
+use App\Services\User\UserService;
+use App\Utils\Validator\BaseRequest;
+use Doctrine\ORM\NonUniqueResultException;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Regex;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+class RegisterUserRequest extends BaseRequest
+{
+    #[NotBlank]
+    #[NotNull]
+    #[Regex(pattern: '/^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s]+$/u', message: 'El formato es incorrecto, sólo se permiten caracteres alfabéticos válidos')]
+    public string $name;
+
+
+    #[NotBlank]
+    #[NotNull]
+    public string $email;
+
+    #[NotBlank]
+    #[NotNull]
+    public string $targetWeight;
+
+    #[NotBlank]
+    #[NotNull]
+    public string $sex;
+
+    #[NotBlank]
+    #[NotNull]
+    public string $birthdate;
+
+    #[NotBlank]
+    #[NotNull]
+    public int $height;
+
+    #[NotBlank]
+    #[NotNull]
+    public float $weight;
+
+    #[NotBlank]
+    #[NotNull]
+    public string $password;
+
+    public ?bool $toGainMuscle = false;
+    public ?bool $toLoseWeight = false;
+    public ?bool $toMaintainWeight = false;
+    public ?bool $toImprovePhysicalHealth = false;
+    public ?bool $toImproveMentalHealth = false;
+    public ?bool $fixShoulder = false;
+    public ?bool $fixKnees = false;
+    public ?bool $fixBack = false;
+    public ?bool $rehab = false;
+
+    public function __construct(ValidatorInterface $validator,
+                                Security $token,
+                                JWTTokenManagerInterface $jwtManager,
+                                protected UserService $userService,
+                                protected UserPermissionService $userPermissionService)
+    {
+        parent::__construct($validator, $token, $jwtManager);
+    }
+
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function validate(): void
+    {
+        parent::validate();
+
+        $userCheckByEmail = $this->userService->getUserByEmail($this->email);
+
+        if($userCheckByEmail)
+        {
+            $this->addError('email', 'Ya existe un usuario con el email introducido');
+            $this->resolveRequest();
+        }
+    }
+}

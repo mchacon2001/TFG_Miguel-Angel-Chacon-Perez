@@ -1,0 +1,5 @@
+#* * * * * /usr/local/bin/php /var/www/html/bin/console schedule:run >> /var/log/cron.log
+#*/5 * * * * /usr/local/bin/php /var/www/html/bin/console app:utils:run-workers >> /var/log/cron.log
+#0 2 * * * /usr/local/bin/php /var/www/html/bin/console app:dish:update-stats >> /var/log/cron.log
+#0 2 * * * /usr/local/bin/php /var/www/html/bin/console app:sales:import-tpv-sales >> /var/log/cron.log
+
