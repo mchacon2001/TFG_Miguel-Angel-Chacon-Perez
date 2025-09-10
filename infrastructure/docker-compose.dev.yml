@@ -1,0 +1,67 @@
+version: '3.3'
+services:
+  backend:
+    container_name: brainygym_backend
+    build:
+      context: ./services/php/symfony6
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    volumes:
+      - ./../backend:/var/www/html
+    networks:
+      - brainygym-backend
+
+  frontend:
+    container_name: brainygym_frontend
+    build:
+      context: ./services/node/node-front
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8082
+    ports:
+      - "80:8082"
+    tty: true
+    volumes:
+      - ./../frontend:/usr/src/app
+    networks:
+      - brainygym-backend
+    command: >
+      sh -c "chmod 777 -R ./*
+      && yarn start || (echo 'No se ha podido arrancar npm. Hay aplicacion en la carpeta?' && sh)"
+
+  mysql:
+    container_name: brainygym_mysql
+    image: mariadb:11.2.2
+    env_file: ./.env
+    command:
+      - --max_allowed_packet=500M
+      - --sql-mode=
+      - --innodb-buffer-pool-size=5G
+      - --innodb-flush-log-at-trx-commit=0
+      - --innodb-log-file-size=2G
+      - --innodb_flush_method=O_DIRECT
+    volumes:
+      - brainygym-data-mysql:/var/lib/mysql
+      - ./sql:/root/
+    networks:
+      - brainygym-backend
+
+  phpmyadmin:
+    container_name: brainygym_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    ports:
+    - "8084:80"
+    environment:
+      PMA_HOST: mysql
+      UPLOAD_LIMIT: 400M
+    networks:
+      - brainygym-backend
+
+networks:
+  brainygym-backend:
+    driver: bridge
+
+volumes:
+  brainygym-data-mysql:
+    driver: local

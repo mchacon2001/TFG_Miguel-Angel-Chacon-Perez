@@ -1,0 +1,21 @@
+controllers_admin:
+    resource:
+        path: ../src/Controller/Private
+        namespace: App\Controller\Private
+    type: attribute
+    prefix: '/api'
+
+controllers_public:
+    resource:
+        path: ../src/Controller/Public
+        namespace: App\Controller\Public
+    type: attribute
+    prefix: '/'
+
+api_login_check:
+    path: /api/login_check
+
+# app.swagger_ui:
+#     path: /api/doc
+#     methods: GET
+#     defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
